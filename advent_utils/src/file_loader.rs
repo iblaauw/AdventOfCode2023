@@ -11,16 +11,26 @@ impl FileLoader {
     }
 
     pub fn open_file(&self) -> FileHelper {
-        let path = Self::get_file_path(self.day);
-        let raw_file = File::open(path).unwrap();
+        self.open_file_worker(None)
+    }
 
+    pub fn open_file_with_name(&self, post_fix: &str) -> FileHelper {
+        self.open_file_worker(Some(post_fix))
+    }
+
+    fn open_file_worker(&self, post_fix: Option<&str>) -> FileHelper {
+        let path = self.get_file_path(post_fix);
+        let raw_file = File::open(path).unwrap();
         FileHelper { raw_file }
     }
 
-    fn get_file_path(_: u32) -> String {
-        String::from("blah.txt")
+    fn get_file_path(&self, post_fix: Option<&str>) -> String {
+        let day = self.day;
+        match post_fix {
+            Some(pf) => format!("data/day{day}_{pf}.txt"),
+            None => format!("data/day{day}.txt")
+        }
     }
-
 }
 
 pub struct FileHelper {
@@ -85,5 +95,13 @@ mod tests {
 
         let contents = fh.into_string();
         assert_eq!(contents, CONTENTS);
+    }
+
+    #[test]
+    fn test_postfix() {
+        let fl = FileLoader{ day: 13 };
+        assert_eq!(fl.get_file_path(None), "data/day13.txt");
+        assert_eq!(fl.get_file_path(Some("fooblah")), "data/day13_fooblah.txt");
+        assert_eq!(fl.get_file_path(Some("food.good")), "data/day13_food.good.txt");
     }
 }
