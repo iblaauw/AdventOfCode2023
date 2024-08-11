@@ -44,10 +44,19 @@ fn get_number2(line: &str) -> u32 {
             let piece = r1.slice(prefix);
             first_num = number_parse(piece);
         } else {
-            first_num = line[]
+            first_num = Some(line[i1..(i1+1)].parse().expect("No valid digit?"));
         }
 
-        panic!("Not Implemented");
+        let postfix = &line[(i2+1)..];
+        let second_num;
+        if let Some(r2) = find_number_backward(postfix) {
+            let piece = r2.slice(postfix);
+            second_num = number_parse(piece);
+        } else {
+            second_num = Some(line[i2..(i2+1)].parse().expect("No valid digit?"));
+        }
+
+        return (first_num.unwrap() * 10) + second_num.unwrap();
     } else {
         panic!("Not Implemented");
     }
@@ -91,6 +100,10 @@ fn find_number_forward(line: &str) -> Option<RangeIndex> {
         }
     }
     vals
+}
+
+fn find_number_backward(_line: &str) -> Option<RangeIndex> {
+    panic!("Not Implemented");
 }
 
 fn temp(vals: Option<RangeIndex>, line: &str) -> Option<u32> {
