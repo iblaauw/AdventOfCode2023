@@ -1,4 +1,4 @@
-use std::slice::SliceIndex;
+mod number_finder;
 
 fn main() {
     println!("Hello, world!");
@@ -34,130 +34,10 @@ fn solve2(fh: advent_utils::FileHelper) -> u32 {
         .sum()
 }
 
-const NUM_LITERALS: [&str;9] = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
-
 fn get_number2(line: &str) -> u32 {
-    if let Some((i1, i2)) = get_numeric_indices(line) {
-        let prefix = &line[..i1];
-        let first_num;
-        if let Some(r1) = find_number_forward(prefix) {
-            let piece = r1.slice(prefix);
-            first_num = number_parse(piece);
-        } else {
-            first_num = Some(line[i1..(i1+1)].parse().expect("No valid digit?"));
-        }
-
-        let postfix = &line[(i2+1)..];
-        let second_num;
-        if let Some(r2) = find_number_backward(postfix) {
-            let piece = r2.slice(postfix);
-            second_num = number_parse(piece);
-        } else {
-            second_num = Some(line[i2..(i2+1)].parse().expect("No valid digit?"));
-        }
-
-        return (first_num.unwrap() * 10) + second_num.unwrap();
-    } else {
-        panic!("Not Implemented");
-    }
+    let (i1, i2) = number_finder::find_numbers(line).expect("Could not find any values in line??");
+    i1 * 10 + i2
 }
-
-fn get_numeric_indices(line: &str) -> Option<(usize, usize)> {
-    let first = line.find(char::is_numeric);
-
-    let first_index = first?;
-    let second = line.rfind(char::is_numeric);
-    let second_index = second.expect("Could find a digit in one direction but not the other?");
-    Some((first_index, second_index))
-}
-
-fn number_parse(line: &str) -> Option<u32> {
-    match line {
-        "one" => Some(1),
-        "two" => Some(2),
-        "three" => Some(3),
-        "four" => Some(4),
-        "five" => Some(5),
-        "six" => Some(6),
-        "seven" => Some(7),
-        "eight" => Some(8),
-        "nine" => Some(9),
-        _ => None
-    }
-}
-
-fn find_number_forward(line: &str) -> Option<RangeIndex> {
-    let mut vals: Option<RangeIndex> = None;
-    for number in NUM_LITERALS {
-        if let Some(range) = RangeIndex::find(line, number) {
-            let replace = match &vals {
-                None => true,
-                Some(v) => range.start < v.start
-            };
-            if replace {
-                vals = Some(range);
-            }
-        }
-    }
-    vals
-}
-
-fn find_number_backward(_line: &str) -> Option<RangeIndex> {
-    panic!("Not Implemented");
-}
-
-fn temp(vals: Option<RangeIndex>, line: &str) -> Option<u32> {
-    let range = vals?;
-    let substr = range.slice(line);
-    let number = number_parse(substr).expect("Can't parse a found number?");
-    Some(number)
-}
-
-struct RangeIndex {
-    start: usize,
-    stop: usize
-}
-
-impl RangeIndex {
-    fn slice<'a>(&self, input: &'a str) -> &'a str {
-        &input[(self.start)..(self.stop)]
-    }
-
-    fn find(input: &str, pattern: &str) -> Option<Self> {
-        let index = input.find(pattern)?;
-        let range = RangeIndex {
-            start: index,
-            stop: index + pattern.len(),
-        };
-        Some(range)
-    }
-
-    fn rfind(input: &str, pattern: &str) -> Option<Self> {
-        let index = input.rfind(pattern)?;
-        let range = RangeIndex {
-            start: index,
-            stop: index + pattern.len(),
-        };
-        Some(range)
-    }
-
-    /*fn find_num(input: &str) -> Option<Self> {
-        let index = input.find(char::is_numeric)?;
-        let range = RangeIndex {
-            start: index, stop: index+1
-        };
-        Some(range)
-    }
-
-    fn rfind_num(input: &str) -> Option<Self> {
-        let index = input.find(char::is_numeric)?;
-        let range = RangeIndex {
-            start: index, stop: index+1
-        };
-        Some(range)
-    }*/
-}
-
 
 #[cfg(test)]
 mod tests {
