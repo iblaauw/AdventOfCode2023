@@ -22,10 +22,14 @@ struct FindRange {
     length: usize
 }
 
+#[derive(Clone)]
 enum FindDirection {
     Forward,
     Backward
 }
+
+// The basic enum is a value type
+impl Copy for FindDirection {}
 
 struct FindResult {
     forward: FindRange,
@@ -62,7 +66,23 @@ impl FindRange {
         })
     }
 
-    fn find_literal(_line: &str, _direction: FindDirection) -> Option<Self> {
+    fn find_literal(line: &str, direction: FindDirection) -> Option<Self> {
+        let mut result: Option<Self> = None;
+        for lit in NUM_LITERALS {
+            let new_opt = Self::find_single_literal(line, lit, direction);
+            if let Some(r) = &mut result {
+                if let Some(new_result) = new_opt {
+                    r.combine(new_result, direction);
+                }
+            } else {
+                result = new_opt;
+            }
+        }
+
+        result
+    }
+
+    fn find_single_literal(line: &str, literal: &str, direction: FindDirection) -> Option<Self> {
         panic!("Not Implemented");
     }
 
@@ -77,6 +97,7 @@ impl FindRange {
     }
 
     fn get_value(&self, line: &str) -> u32 {
+        let substr = self.slice(line);
         panic!("Not Implemented")
     }
 
