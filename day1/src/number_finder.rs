@@ -78,6 +78,10 @@ impl FindRange {
         let mut result: Option<Self> = None;
         for lit in NUM_LITERALS {
             let new_opt = Self::find_single_literal(line, lit, direction);
+            #[cfg(test)]
+            {
+                println!("Test literal {lit} and got result {:?}", new_opt);
+            }
             if let Some(r) = &mut result {
                 if let Some(new_result) = new_opt {
                     r.combine(new_result, direction);
@@ -108,7 +112,7 @@ impl FindRange {
     }
 
     fn slice_after<'a>(&self, line: &'a str) -> &'a str {
-        let index = self.index + self.length;
+        let index = self.index + 1;
         &line[index..]
     }
 
@@ -122,7 +126,7 @@ impl FindRange {
     }
 
     fn expand(&mut self, other: &Self) {
-        self.index += other.index + other.length;
+        self.index += other.index + 1;
     }
 
     fn combine(&mut self, other: Self, direction: FindDirection) {

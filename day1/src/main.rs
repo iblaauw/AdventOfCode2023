@@ -110,4 +110,16 @@ mod tests {
         assert_eq!(solution, 281);
     }
 
+    #[test]
+    fn test_even_harder() {
+        assert_eq!(get_number2("threethreethreethree"), 33);
+        assert_eq!(get_number2("onetwothreefourfivesixseveneightnine"), 19);
+        assert_eq!(get_number2("6twones"), 61);
+    }
+
+    #[test]
+    fn test_overlap() {
+        assert_eq!(get_number2("twone"), 21);
+    }
+
 }
