@@ -1,3 +1,4 @@
+mod game_input;
 
 fn main() {
     println!("Hello, world!");
