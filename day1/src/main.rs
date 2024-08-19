@@ -90,6 +90,11 @@ mod tests {
     }
 
     #[test]
+    fn test_numbers_broken() {
+        assert_eq!(get_number2("five4five4"), 54);
+    }
+
+    #[test]
     fn test_solution_given() {
         let helper = advent_utils::Helper::new(1);
         let fh = helper.open_file_with_name("given_test");

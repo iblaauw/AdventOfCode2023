@@ -1,6 +1,12 @@
 pub fn find_numbers(line: &str) -> Option<(u32, u32)> {
     let numeric_opt = FindResult::find_numeric(line);
     let literal_opt = FindResult::find_literal(line);
+    
+    #[cfg(test)]
+    {
+        println!("Numeric result: {:?}", numeric_opt);
+        println!("Literal result: {:?}", literal_opt);
+    }
 
     let find_result : FindResult = if numeric_opt.is_none() {
         literal_opt?
@@ -17,6 +23,7 @@ pub fn find_numbers(line: &str) -> Option<(u32, u32)> {
 }
 
 #[derive(Clone)]
+#[derive(Debug)]
 struct FindRange {
     index: usize,
     length: usize
@@ -31,6 +38,7 @@ enum FindDirection {
 // The basic enum is a value type
 impl Copy for FindDirection {}
 
+#[derive(Debug)]
 struct FindResult {
     forward: FindRange,
     backward: FindRange,
@@ -83,7 +91,15 @@ impl FindRange {
     }
 
     fn find_single_literal(line: &str, literal: &str, direction: FindDirection) -> Option<Self> {
-        panic!("Not Implemented");
+        let index = match direction {
+            FindDirection::Forward => line.find(literal),
+            FindDirection::Backward => line.rfind(literal),
+        }?;
+
+        Some(Self {
+            index,
+            length: literal.len(),
+        })
     }
 
     fn slice<'a>(&self, line: &'a str) -> &'a str {
@@ -98,16 +114,23 @@ impl FindRange {
 
     fn get_value(&self, line: &str) -> u32 {
         let substr = self.slice(line);
-        panic!("Not Implemented")
+        if self.length == 1 {
+            substr.parse::<u32>().expect("Found invalid number.")
+        } else {
+            literal_parse(substr).expect("Found invalid number.")
+        }
     }
 
     fn expand(&mut self, other: &Self) {
-        self.index += other.length;
+        self.index += other.index + other.length;
     }
 
     fn combine(&mut self, other: Self, direction: FindDirection) {
         if self.index == other.index {
             // Something really bad has happened if we found different numbers at the same index
+            if other.length != self.length {
+                println!("Self {:?} and other {:?}", self, other);
+            }
             assert_eq!(self.length, other.length);
             return;
         }
@@ -143,7 +166,7 @@ impl FindResult {
         let backward_opt = finder(remaining, FindDirection::Backward);
 
         let backward = match backward_opt {
-            Some(mut val) => { val.expand(&forward); val } // Realign the index to the value for the overal string
+            Some(mut val) => { val.expand(&forward); val } // Realign the index to the value for the overall string
             None => forward.clone() // If we found nothing, then the value is just the same as the forward search
         };
 
