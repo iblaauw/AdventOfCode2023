@@ -8,6 +8,8 @@ fn main() {
     helper.print_header();
     let solution = solve(helper.open_file());
     helper.print_solution(solution);
+    let solution2 = solve2(helper.open_file());
+    helper.print_solution(solution2);
 }
 
 fn solve(fh: advent_utils::FileHelper) -> u32 {
@@ -40,7 +42,13 @@ fn is_valid(game: &Game) -> bool {
 }
 
 fn solve2(fh: advent_utils::FileHelper) -> u32 {
-    panic!("Not Implemented");
+    let mut result = 0;
+    for line in fh.into_lines() {
+        let game: Game = line.parse().unwrap();
+        result += game.get_power();
+    }
+
+    result
 }
 
 #[cfg(test)]
