@@ -39,6 +39,10 @@ fn is_valid(game: &Game) -> bool {
     return true;
 }
 
+fn solve2(fh: advent_utils::FileHelper) -> u32 {
+    panic!("Not Implemented");
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -49,5 +53,13 @@ mod tests {
         let fh = helper.open_file_with_name("given_test");
         let solution = solve(fh);
         assert_eq!(solution, 8);
+    }
+
+    #[test]
+    fn test_given2() {
+        let helper = advent_utils::Helper::new(2);
+        let fh = helper.open_file_with_name("given_test2");
+        let solution = solve2(fh);
+        assert_eq!(solution, 2286);
     }
 }

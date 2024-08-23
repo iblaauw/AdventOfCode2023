@@ -1,9 +1,29 @@
 use std::fmt;
 use std::str::FromStr;
+use std::cmp::max;
 
 pub struct Game {
     pub id: u32,
     pub draws: Vec<GameDraw>,
+}
+
+impl Game {
+    pub fn get_power(&self) -> u32 {
+        let (r, g, b) = self.get_min_use();
+        r * g * b
+    }
+
+    fn get_min_use(&self) -> (u32, u32, u32) {
+        let mut r = 0;
+        let mut g = 0;
+        let mut b = 0;
+        for d in &self.draws {
+            r = max(r, d.red);
+            g = max(g, d.green);
+            b = max(b, d.blue);
+        }
+        (r,g,b)
+    }
 }
 
 impl FromStr for Game {
@@ -147,5 +167,21 @@ mod tests {
         assert!(try1.draws[1].red == 4);
         assert!(try1.draws[1].green == 9);
         assert!(try1.draws[1].blue == 16);
+    }
+
+    #[test]
+    fn test_basic_minuse() {
+        let game: Game = "Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green".parse().unwrap();
+        let (r,g,b) = game.get_min_use();
+        assert!(r == 6);
+        assert!(g == 3);
+        assert!(b == 2);
+    }
+
+    #[test]
+    fn test_basic_power() {
+        let game: Game = "Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red".parse().unwrap();
+        let p = game.get_power();
+        assert!(p == 1560);
     }
 }
