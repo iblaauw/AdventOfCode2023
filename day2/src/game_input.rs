@@ -6,6 +6,44 @@ pub struct Game {
     pub draws: Vec<GameDraw>,
 }
 
+impl FromStr for Game {
+    type Err = GameParsingError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        const PREFIX: &'static str = "Game ";
+        if !s.starts_with(PREFIX) {
+            return GameParsingError::as_err(format!("Invalid input - expected line to start with '{:?}'", PREFIX));
+        }
+
+        let s = s[(PREFIX.len())..].trim();
+        let colon_index = s.find(':')
+            .ok_or_else(|| GameParsingError::from("Expected line to have a ':'"))
+            ?;
+
+        let digit_piece = s[..colon_index].trim();
+        let draw_piece = s[(colon_index)+1..].trim();
+
+        let id: u32 = digit_piece.parse()
+            .map_err(|_e| GameParsingError::new(format!("Could not parse id '{:?}'", digit_piece)))
+            ?;
+
+        let mut game = Self {
+            id,
+            draws: Vec::new()
+        };
+
+        for draw_str in draw_piece.split(';') {
+            let draw: GameDraw = draw_str.trim()
+                .parse()
+                ?;
+            
+            game.draws.push(draw);
+        }
+
+        Ok(game)
+    }
+}
+
 pub struct GameDraw {
     pub red: u32,
     pub green: u32,
@@ -44,7 +82,9 @@ impl FromStr for GameDraw {
                 "red" => value.red = digit,
                 "green" => value.green = digit,
                 "blue" => value.blue = digit,
-                color => { return Err(GameParsingError::new(format!("Invalid color {:?}", color) )); }
+                color => {
+                    return GameParsingError::as_err(format!("Invalid color {:?}", color) );
+                }
             }
         }
 
@@ -67,10 +107,45 @@ impl GameParsingError {
             message: String::from(message)
         }
     }
+
+    fn as_err<T>(message: String) -> Result<T, Self> {
+        Err(Self::new(message))
+    }
 }
 
 impl fmt::Display for GameParsingError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", &self.message)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn basic_parse_gamedraw() {
+        let try1: GameDraw = "3 blue, 6 red, 5 green".parse().unwrap();
+        assert!(try1.red == 6);
+        assert!(try1.blue == 3);
+        assert!(try1.green == 5);
+
+        let try2: GameDraw = "79 green, 17 red".parse().unwrap();
+        assert!(try2.red == 17);
+        assert!(try2.blue == 0);
+        assert!(try2.green == 79);
+    }
+
+    #[test]
+    fn basic_parse_game() {
+        let try1: Game = "Game 17: 5 blue, 3 red; 4 red, 16 blue, 9 green".parse().unwrap();
+        assert!(try1.id == 17);
+        assert!(try1.draws.len() == 2);
+        assert!(try1.draws[0].red == 3);
+        assert!(try1.draws[0].green == 0);
+        assert!(try1.draws[0].blue == 5);
+        assert!(try1.draws[1].red == 4);
+        assert!(try1.draws[1].green == 9);
+        assert!(try1.draws[1].blue == 16);
     }
 }
