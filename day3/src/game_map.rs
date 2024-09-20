@@ -37,6 +37,8 @@ impl GameMap {
                     let number = self.extract_number(loc);
                     return Some(number)
                 }
+
+                loc.x += 1;
             }
             loc.x = 0;
             loc.y += 1;
@@ -46,7 +48,63 @@ impl GameMap {
     }
 
     pub fn is_symbol_near(&self, number: &NumberRegion) -> bool {
-        panic!("Not Implemented");
+        let x_len = self.get_x_len();
+        let y_len = self.get_y_len();
+
+        let has_left = number.x_start > 0;
+        let has_right = number.x_end < x_len;
+
+        // Get start and end points of the box that the region is determined by but expanded by 1 in
+        // all directions. Remember end points are exclusive!
+        let start_x = if has_left { number.x_start - 1 } else { 0 };
+        let end_x = if has_right { number.x_end + 1 } else { x_len };
+
+        let top_y = if number.y == 0 { None } else { Some(number.y - 1) };
+        let bottom_y = if number.y + 1 >= y_len { None } else { Some(number.y + 1) };
+
+        fn counts_as_symbol(val: char) -> bool {
+            // Be careful... another number doesn't count as a symbol
+            val != '.' && !val.is_alphanumeric()
+        }
+
+        // Check the top row (if any)
+        if let Some(y) = top_y {
+            for x in start_x..end_x {
+                let map_item = self.map[y][x];
+                if counts_as_symbol(map_item) {
+                    return true;
+                }
+            }
+        }
+
+        // Check the bottom row (if any)
+        if let Some(y) = bottom_y {
+            for x in start_x..end_x {
+                let map_item = self.map[y][x];
+                if counts_as_symbol(map_item) {
+                    return true;
+                }
+            }
+        }
+
+        // Check the sides now
+
+        if has_left {
+            let map_item = self.map[number.y][start_x];
+            if counts_as_symbol(map_item) {
+                return true;
+            }
+        }
+
+        if has_right {
+            let map_item = self.map[number.y][end_x];
+            if counts_as_symbol(map_item) {
+                return true;
+            }
+        }
+        
+
+        return false;
     }
 
     fn get_x_len(&self) -> usize {
