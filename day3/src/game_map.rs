@@ -97,7 +97,8 @@ impl GameMap {
         }
 
         if has_right {
-            let map_item = self.map[number.y][end_x];
+            // end_x is *exclusive* end point
+            let map_item = self.map[number.y][end_x - 1];
             if counts_as_symbol(map_item) {
                 return true;
             }

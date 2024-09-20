@@ -5,7 +5,7 @@ fn main() {
     let helper = advent_utils::Helper::new(3);
     helper.print_header();
     // let solution = solve(helper.open_file());
-    let solution = solve(helper.open_file_with_name("given_test"));
+    let solution = solve(helper.open_file());
     helper.print_solution(solution);
 }
 
