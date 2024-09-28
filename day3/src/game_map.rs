@@ -3,7 +3,7 @@ pub struct GameMap {
     map: Vec<Vec<char>>
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct Location {
     pub x: usize,
     pub y: usize,
@@ -106,6 +106,11 @@ impl GameMap {
         
 
         return false;
+    }
+
+    pub fn get_adjacent_symbols(&self, number: &NumberRegion, symbol: char) -> impl Iterator<Item = Location> {
+        panic!("Not Impl");
+        Vec::<Location>::new().into_iter()
     }
 
     fn get_x_len(&self) -> usize {
