@@ -1,5 +1,6 @@
 mod file_loader;
 pub mod grid;
+pub mod generic_error;
 
 pub use file_loader::FileHelper;
 

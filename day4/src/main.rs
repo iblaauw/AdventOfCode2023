@@ -1,3 +1,5 @@
+mod scratch_card;
+
 fn main() {
     println!("Hello, world!");
 
