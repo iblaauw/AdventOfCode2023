@@ -51,7 +51,7 @@ impl GearData {
 
     fn get_ratio(&self) -> u32 {
         if self.count > 0 && self.count <= 2 {
-            self.values[0] + self.values[1]
+            self.values[0] * self.values[1]
         } else {
             0
         }

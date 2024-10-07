@@ -1,3 +1,4 @@
+use std::ops::Range;
 
 pub struct GameMap {
     map: Vec<Vec<char>>
@@ -14,6 +15,15 @@ pub struct NumberRegion {
     x_end: usize,
     y: usize,
     value: u32,
+}
+
+struct SurroundingBox {
+    top_bottom_x: Range<usize>,
+    top_y: Option<usize>,
+    bottom_y: Option<usize>,
+    left_right_y: usize,
+    left_x: Option<usize>,
+    right_x: Option<usize>
 }
 
 impl GameMap {
@@ -48,19 +58,7 @@ impl GameMap {
     }
 
     pub fn is_symbol_near(&self, number: &NumberRegion) -> bool {
-        let x_len = self.get_x_len();
-        let y_len = self.get_y_len();
-
-        let has_left = number.x_start > 0;
-        let has_right = number.x_end < x_len;
-
-        // Get start and end points of the box that the region is determined by but expanded by 1 in
-        // all directions. Remember end points are exclusive!
-        let start_x = if has_left { number.x_start - 1 } else { 0 };
-        let end_x = if has_right { number.x_end + 1 } else { x_len };
-
-        let top_y = if number.y == 0 { None } else { Some(number.y - 1) };
-        let bottom_y = if number.y + 1 >= y_len { None } else { Some(number.y + 1) };
+        let surround_box = self.get_surrounding_box(number);
 
         fn counts_as_symbol(val: char) -> bool {
             // Be careful... another number doesn't count as a symbol
@@ -68,8 +66,8 @@ impl GameMap {
         }
 
         // Check the top row (if any)
-        if let Some(y) = top_y {
-            for x in start_x..end_x {
+        if let Some(y) = surround_box.top_y {
+            for x in surround_box.top_bottom_x.clone() {
                 let map_item = self.map[y][x];
                 if counts_as_symbol(map_item) {
                     return true;
@@ -78,8 +76,8 @@ impl GameMap {
         }
 
         // Check the bottom row (if any)
-        if let Some(y) = bottom_y {
-            for x in start_x..end_x {
+        if let Some(y) = surround_box.bottom_y {
+            for x in surround_box.top_bottom_x {
                 let map_item = self.map[y][x];
                 if counts_as_symbol(map_item) {
                     return true;
@@ -88,29 +86,68 @@ impl GameMap {
         }
 
         // Check the sides now
-
-        if has_left {
-            let map_item = self.map[number.y][start_x];
+        if let Some(x) = surround_box.left_x {
+            let map_item = self.map[surround_box.left_right_y][x];
             if counts_as_symbol(map_item) {
                 return true;
             }
         }
 
-        if has_right {
+        if let Some(x) = surround_box.right_x {
             // end_x is *exclusive* end point
-            let map_item = self.map[number.y][end_x - 1];
+            let map_item = self.map[surround_box.left_right_y][x];
             if counts_as_symbol(map_item) {
                 return true;
             }
         }
-        
 
         return false;
     }
 
     pub fn get_adjacent_symbols(&self, number: &NumberRegion, symbol: char) -> impl Iterator<Item = Location> {
-        panic!("Not Impl");
-        Vec::<Location>::new().into_iter()
+        let surround_box = self.get_surrounding_box(number);
+
+        let mut symbol_list = Vec::new();
+
+        // Check top
+        if let Some(y) = surround_box.top_y {
+            for x in surround_box.top_bottom_x.clone() {
+                let map_item = self.map[y][x];
+                if map_item == symbol {
+                    symbol_list.push(Location{ x, y });
+                }
+            }
+        }
+
+        // Check bottom
+        if let Some(y) = surround_box.bottom_y {
+            for x in surround_box.top_bottom_x {
+                let map_item = self.map[y][x];
+                if map_item == symbol {
+                    symbol_list.push(Location{ x, y });
+                }
+            }
+        }
+
+        // Check left
+        if let Some(x) = surround_box.left_x {
+            let y = surround_box.left_right_y;
+            let map_item = self.map[y][x];
+            if map_item == symbol {
+                symbol_list.push(Location{ x, y });
+            }
+        }
+
+        // Check right
+        if let Some(x) = surround_box.right_x {
+            let y = surround_box.left_right_y;
+            let map_item = self.map[y][x];
+            if map_item == symbol {
+                symbol_list.push(Location{ x, y });
+            }
+        }
+
+        return symbol_list.into_iter();
     }
 
     fn get_x_len(&self) -> usize {
@@ -140,6 +177,31 @@ impl GameMap {
             x_end: loc.x + end_index,
             y: loc.y,
             value
+        }
+    }
+
+    fn get_surrounding_box(&self, number: &NumberRegion) -> SurroundingBox {
+        let x_len = self.get_x_len();
+        let y_len = self.get_y_len();
+
+        let has_left = number.x_start > 0;
+        let has_right = number.x_end < x_len;
+
+        // Get start and end points of the box that the region is determined by but expanded by 1 in
+        // all directions. Remember end points are exclusive!
+        let start_x = if has_left { number.x_start - 1 } else { 0 };
+        let end_x = if has_right { number.x_end + 1 } else { x_len };
+
+        let top_y = if number.y == 0 { None } else { Some(number.y - 1) };
+        let bottom_y = if number.y + 1 >= y_len { None } else { Some(number.y + 1) };
+
+        SurroundingBox {
+            top_bottom_x: start_x..end_x,
+            top_y,
+            bottom_y,
+            left_right_y: number.y,
+            left_x: if has_left { Some(start_x) } else { None },
+            right_x: if has_right{ Some(end_x - 1) } else { None },
         }
     }
 }
