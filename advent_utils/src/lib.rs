@@ -1,4 +1,5 @@
 mod file_loader;
+pub mod grid;
 
 pub use file_loader::FileHelper;
 
