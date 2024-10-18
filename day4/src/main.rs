@@ -13,7 +13,10 @@ fn main() {
 }
 
 fn solve(helper: advent_utils::FileHelper) -> u32 {
-    panic!("Not Impl");
+    helper.into_lines()
+        .map(|s| s.parse::<scratch_card::ScratchCard>().expect("Invalid card"))
+        .map(|c| c.get_value())
+        .sum()
 }
 
 fn solve2(helper: advent_utils::FileHelper) -> u32 {
