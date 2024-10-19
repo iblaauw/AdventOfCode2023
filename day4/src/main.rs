@@ -1,4 +1,5 @@
 mod scratch_card;
+mod card_registrar;
 
 fn main() {
     println!("Hello, world!");
@@ -20,7 +21,13 @@ fn solve(helper: advent_utils::FileHelper) -> u32 {
 }
 
 fn solve2(helper: advent_utils::FileHelper) -> u32 {
-    0
+    let card_copies = card_registrar::CardCopyRegistrar::new();
+    for line in helper.into_lines() {
+        let card : scratch_card::ScratchCard = line.parse().expect("Invalid card??");
+        let id = card.get_id();
+        card_copies.register(id, card.get_num_matches());
+    }
+    card_copies.get_total_copies()
 }
 
 #[cfg(test)]
@@ -33,5 +40,13 @@ mod tests {
         let fh = helper.open_file_with_name("given_test");
         let solution = solve(fh);
         assert_eq!(solution, 13);
+    }
+
+    #[test]
+    fn test_given2() {
+        let helper = advent_utils::Helper::new(4);
+        let fh = helper.open_file_with_name("given_test");
+        let solution = solve2(fh);
+        assert_eq!(solution, 30);
     }
 }

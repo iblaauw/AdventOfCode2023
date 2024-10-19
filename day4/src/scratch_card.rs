@@ -10,8 +10,7 @@ pub struct ScratchCard {
 
 impl ScratchCard {
     pub fn get_value(&self) -> u32 {
-        let intersect = self.winners.intersection(&self.values);
-        let correct_count = intersect.count();
+        let correct_count = self.get_num_matches();
         if correct_count == 0 {
             0
         } else {
@@ -21,6 +20,15 @@ impl ScratchCard {
             // 4 correct -> 8...
             1 << (correct_count - 1)
         }
+    }
+
+    pub fn get_num_matches(&self) -> usize {
+        let intersect = self.winners.intersection(&self.values);
+        intersect.count()
+    }
+
+    pub fn get_id(&self) -> u32 {
+        self.id
     }
 }
 
