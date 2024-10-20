@@ -21,7 +21,7 @@ fn solve(helper: advent_utils::FileHelper) -> u32 {
 }
 
 fn solve2(helper: advent_utils::FileHelper) -> u32 {
-    let card_copies = card_registrar::CardCopyRegistrar::new();
+    let mut card_copies = card_registrar::CardCopyRegistrar::new();
     for line in helper.into_lines() {
         let card : scratch_card::ScratchCard = line.parse().expect("Invalid card??");
         let id = card.get_id();
