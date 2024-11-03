@@ -49,3 +49,32 @@ mod tests {
         assert_eq!(lines[1], "Hopefully the test actually works");
     }
 }
+
+pub fn run<S1, S2>(day: u32, solve_func: S1, solve_func2: S2)
+    where S1: FnOnce(FileHelper) -> u32,
+        S2: FnOnce(FileHelper) -> u32
+{
+    let helper = Helper::new(day);
+    helper.print_header();
+    let solution1 = solve_func(helper.open_file());
+    helper.print_solution(solution1);
+    let solution2 = solve_func2(helper.open_file());
+    helper.print_solution(solution2);
+}
+
+pub fn test_named<S1, S2>(day: u32, solve_func1: S1, solve_func2: S2, name: &str)
+    -> (u32, u32)
+    where S1: FnOnce(FileHelper) -> u32,
+        S2: FnOnce(FileHelper) -> u32
+{
+    let helper = Helper::new(day);
+
+    let fh1 = helper.open_file_with_name(name);
+    let solution1 = solve_func1(fh1);
+
+    let fh2 = helper.open_file_with_name(name);
+    let solution2 = solve_func2(fh2);
+
+    (solution1, solution2)
+}
+
