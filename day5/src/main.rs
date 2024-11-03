@@ -1,4 +1,5 @@
 mod seed_list;
+mod location_map;
 
 fn main() {
     println!("Hello, world!");

@@ -21,3 +21,10 @@ pub fn expect_prefix<'a>(full_str: &'a str, expected_str: &str)
     full_str.strip_prefix(expected_str)
         .ok_or_else(|| GenericError::new(format!("Expected prefix {}", expected_str)))
 }
+
+pub fn expect_suffix<'a>(full_str: &'a str, expected_str: &str)
+    -> Result<&'a str, GenericError>
+{
+    full_str.strip_suffix(expected_str)
+        .ok_or_else(|| GenericError::new(format!("Expected suffix {}", expected_str)))
+}

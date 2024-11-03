@@ -1,4 +1,4 @@
-use std::{error::Error, fmt::Display};
+use std::fmt::Display;
 use core::num::ParseIntError;
 
 #[derive(Debug)]
