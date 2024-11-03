@@ -1,3 +1,5 @@
+mod seed_list;
+
 fn main() {
     println!("Hello, world!");
 

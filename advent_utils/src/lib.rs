@@ -1,6 +1,7 @@
 mod file_loader;
 pub mod grid;
 pub mod generic_error;
+pub mod parse_utils;
 
 pub use file_loader::FileHelper;
 
