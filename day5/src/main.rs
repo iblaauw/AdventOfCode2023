@@ -31,13 +31,17 @@ fn solve(fh: advent_utils::FileHelper) -> u32 {
         {
             if line.ends_with(':') {
                 if let Some(map) = &current_map {
+                    println!("    Applying to seeds...");
                     // Our previous map is complete. Apply it to our seed list.
                     seeds.apply_map(map);
                 }
 
+                println!("Processing new map: {}", line);
+
                 // This is a map, let's parse it
                 let new_map : location_map::LocationMap = line.parse::<location_map::LocationMap>()
                     .expect(&format!("Invalid map? Line: {}", line));
+
                 current_map = Some(new_map);
             }
             else
@@ -53,7 +57,9 @@ fn solve(fh: advent_utils::FileHelper) -> u32 {
     }
 
     // Apply the last map
-    if let Some(map) = &current_map {
+    if let Some(map) = &mut current_map {
+        map.set_debug_flag();
+        println!("    Final applying to seeds...");
         seeds.apply_map(map);
     }
 

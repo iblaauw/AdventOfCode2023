@@ -3,20 +3,22 @@ use advent_utils::generic_error::GenericError;
 use advent_utils::parse_utils;
 
 pub struct LocationMap {
-    ranges: Vec<LocationMapRange>
+    ranges: Vec<LocationMapRange>,
+    debug_flag: bool,
 }
 
 struct LocationMapRange {
     source_start: u32,
     dest_start: u32,
-    size: u32
+    size: u32,
 }
 
 impl LocationMap {
     fn new(_from: &str, _to: &str) -> Self {
         // At some point I should do something with these
         Self {
-            ranges: Vec::new()
+            ranges: Vec::new(),
+            debug_flag: false,
         }
     }
 
@@ -28,7 +30,14 @@ impl LocationMap {
     }
 
     pub fn map_location(&self, location: u32) -> u32 {
+        if self.debug_flag {
+            println!("Debug: Begin map");
+        }
+
         for range in &self.ranges {
+            if self.debug_flag {
+                println!("Debug:     range is - Dest {}, Source {}, Size {}", range.dest_start, range.source_start, range.size);
+            }
             let new_loc = range.map_location(location);
             if new_loc.is_some() {
                 return new_loc.unwrap();
@@ -36,6 +45,10 @@ impl LocationMap {
         }
 
         return location;
+    }
+
+    pub fn set_debug_flag(&mut self) {
+        self.debug_flag = true;
     }
 }
 
@@ -56,7 +69,7 @@ impl FromStr for LocationMap {
 
 impl LocationMapRange {
     fn map_location(&self, value: u32) -> Option<u32> {
-        if value < self.source_start || value > (self.source_start + self.size) {
+        if value < self.source_start || (value - self.source_start) > self.size {
             return None;
         } else {
             return Some(self.dest_start + (value - self.source_start));
@@ -78,7 +91,7 @@ impl FromStr for LocationMapRange {
             LocationMapRange {
                 source_start: values[1],
                 dest_start: values[0],
-                size: values[2]
+                size: values[2],
             })
     }
 }
