@@ -1,6 +1,7 @@
 use std::str::FromStr;
 use advent_utils::generic_error::GenericError;
 use advent_utils::parse_utils;
+use super::location_map::LocationMap;
 
 pub struct SeedList {
     seeds: Vec<u32>,
@@ -11,6 +12,18 @@ impl SeedList {
         SeedList {
             seeds
         }
+    }
+
+    pub fn apply_map(&mut self, map: &LocationMap) {
+        for seed in &mut self.seeds {
+            *seed = map.map_location(*seed);
+        }
+    }
+
+    pub fn get_answer(&self) -> Option<u32> {
+        self.seeds.iter()
+            .min()
+            .map(|x| *x)
     }
 }
 
