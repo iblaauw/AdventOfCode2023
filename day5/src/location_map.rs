@@ -1,6 +1,8 @@
+use std::collections::VecDeque;
 use std::str::FromStr;
 use advent_utils::generic_error::GenericError;
 use advent_utils::parse_utils;
+use std::ops::Range;
 
 pub struct LocationMap {
     ranges: Vec<LocationMapRange>,
@@ -11,6 +13,19 @@ struct LocationMapRange {
     source_start: u32,
     dest_start: u32,
     size: u32,
+}
+
+pub struct PartialRangeMatch {
+    pub result: Option<Range<u32>>,
+    pub remaining: Option<Range<u32>>
+}
+
+enum RangeSplitResult {
+    NoOverlap,
+    FullyContained,
+    SplitFront(Range<u32>, Range<u32>), // The first piece was contained
+    SplitBack(Range<u32>, Range<u32>), // The second piece was contained
+    Encompassed(Range<u32>, Range<u32>, Range<u32>)
 }
 
 impl LocationMap {
@@ -50,6 +65,33 @@ impl LocationMap {
     pub fn set_debug_flag(&mut self) {
         self.debug_flag = true;
     }
+
+    pub fn map_range(&self, location_range: &Range<u32>) -> Vec<Range<u32>> {
+        let mut result = Vec::new();
+        let mut processing_queue = VecDeque::new();
+        processing_queue.push_back(location_range);
+
+        while let Some(value) = processing_queue.pop_front() {
+            let processed = true;
+
+            // Find the first one that doesn't
+            self.ranges.iter()
+                .map(|r| r.split_range(location_range))
+                .nth(0);
+            for map_range in &self.ranges {
+                match map_range.split_range(value) {
+                    RangeSplitResult::NoOverlap => {},
+
+                }
+            }
+        }
+
+        return result;
+    }
+
+    pub fn map_partial_range(&self, location_range: Range<u32>) -> PartialRangeMatch {
+        todo!()
+    }
 }
 
 impl FromStr for LocationMap {
@@ -74,6 +116,52 @@ impl LocationMapRange {
         } else {
             return Some(self.dest_start + (value - self.source_start));
         }
+    }
+
+    fn split_range(&self, range: &Range<u32>) -> RangeSplitResult {
+        let source = self.source_range();
+
+        if source.contains(&range.start) {
+            if source.contains(&(range.end - 1)) {
+                RangeSplitResult::FullyContained
+            } else {
+                let piece1 = range.start..source.end;
+                let piece2 = source.end..range.end;
+                RangeSplitResult::SplitFront(piece1, piece2)
+            }
+        } else if range.contains(&source.start) {
+            if range.contains(&(source.end - 1)) {
+                let piece1 = range.start..source.start;
+                let piece2 = source.end..range.end;
+                RangeSplitResult::Encompassed(piece1, source, piece2)
+            } else {
+                let piece1 = source.start..range.end;
+                let piece2 = range.end..source.end;
+                RangeSplitResult::SplitBack(piece1, piece2)
+            }
+        } else {
+            RangeSplitResult::NoOverlap
+        }
+    }
+
+    fn map_partial_range(&self, range: Range<u32>) -> PartialRangeMatch {
+        let source = self.source_range();
+        
+        if source.contains(&range.start) {
+
+        } else {
+
+        }
+
+        todo!()
+    }
+
+    fn source_range(&self) -> Range<u32> {
+        self.source_start..(self.source_start + self.size)
+    }
+
+    fn dest_range(&self) -> Range<u32> {
+        self.dest_start..(self.dest_start + self.size)
     }
 }
 

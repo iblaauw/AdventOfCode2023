@@ -2,6 +2,7 @@ use std::borrow::Borrow;
 
 mod seed_list;
 mod location_map;
+mod location_range;
 
 fn main() {
     println!("Hello, world!");
@@ -78,6 +79,6 @@ mod tests {
     fn test_given() {
         let (s1, s2) = advent_utils::test_named(5, solve, solve2, "given");
         assert_eq!(s1, 35);
-        assert_eq!(s2, 0);
+        assert_eq!(s2, 46);
     }
 }
